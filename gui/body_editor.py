@@ -173,7 +173,9 @@ class BodyEditorPanel:
     
     def show(self):
         """Show the editor panel."""
-        self.frame.pack(side=tk.LEFT, fill=tk.BOTH, padx=5, pady=5)
+        # Force pack with all parameters to ensure consistent positioning
+        self.frame.pack_forget()  # Remove first to reset position
+        self.frame.pack(side=tk.LEFT, fill=tk.Y, expand=False, anchor=tk.NW, padx=5, pady=5, before=self.parent.winfo_children()[1] if len(self.parent.winfo_children()) > 1 else None)
     
     def hide(self):
         """Hide the editor panel."""

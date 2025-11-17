@@ -85,6 +85,7 @@ class NBodyApp:
         else:
             self.root.title("N-Body Simulation - God Mode")
             self.body_editor.show()
+            # Reset to no selection state when returning to God Mode
             self.body_editor.set_body(None)
         
         self.canvas.render()
@@ -92,6 +93,8 @@ class NBodyApp:
     def clear_all_bodies(self):
         """Clear all bodies from the simulation."""
         self.state.clear_all()
+        
+        # Reset body editor to no selection
         self.body_editor.set_body(None)
         
         # Turn off velocity arrow mode if it was on
