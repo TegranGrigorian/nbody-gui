@@ -87,6 +87,7 @@ class ScenarioPresets:
         """
         # Close binary pair (Alpha and Beta) - tighter orbit for more stability
         # Circular orbit around common center of mass
+        
         alpha = CelestialBody("Alpha", SOLAR_MASS * 1.0, 
                              -0.3*AU, 0, 0, -30000, "#FDB813")
         beta = CelestialBody("Beta", SOLAR_MASS * 1.0, 

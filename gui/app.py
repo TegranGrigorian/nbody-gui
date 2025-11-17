@@ -125,9 +125,15 @@ class NBodyApp:
         """Toggle auto zoom to center of gravity."""
         is_active = self.canvas.toggle_auto_zoom_cog()
         
-        # Update button appearance
+        # Update button appearance and disable conflicting modes
         if is_active:
             self.control_panel.auto_cog_button.config(style='Active.TButton')
+            # Disable other camera modes
+            self.canvas.capture_all_bodies = False
+            self.canvas.focus_body_mode = False
+            self.canvas.focused_body = None
+            self.control_panel.capture_all_button.config(style='TButton')
+            self.control_panel.focus_body_var.set("None")
         else:
             self.control_panel.auto_cog_button.config(style='TButton')
     
@@ -135,9 +141,15 @@ class NBodyApp:
         """Toggle capture all bodies mode."""
         is_active = self.canvas.toggle_capture_all()
         
-        # Update button appearance
+        # Update button appearance and disable conflicting modes
         if is_active:
             self.control_panel.capture_all_button.config(style='Active.TButton')
+            # Disable other camera modes
+            self.canvas.auto_zoom_to_cog = False
+            self.canvas.focus_body_mode = False
+            self.canvas.focused_body = None
+            self.control_panel.auto_cog_button.config(style='TButton')
+            self.control_panel.focus_body_var.set("None")
         else:
             self.control_panel.capture_all_button.config(style='TButton')
     
