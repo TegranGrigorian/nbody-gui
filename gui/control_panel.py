@@ -131,6 +131,20 @@ class ControlPanel:
                                             command=self.toggle_capture_all)
         self.capture_all_button.pack(side=tk.LEFT, padx=2)
         
+        button_row3 = ttk.Frame(view_frame)
+        button_row3.pack(pady=2)
+        
+        self.focus_body_button = ttk.Button(button_row3, text="Focus Body", width=12,
+                                           command=self.toggle_focus_body)
+        self.focus_body_button.pack(side=tk.LEFT, padx=2)
+        
+        # Dropdown for body selection
+        self.focus_body_var = tk.StringVar(value="None")
+        self.focus_body_combo = ttk.Combobox(button_row3, textvariable=self.focus_body_var,
+                                            width=15, state='readonly')
+        self.focus_body_combo.pack(side=tk.LEFT, padx=2)
+        self.focus_body_combo.bind('<<ComboboxSelected>>', self.on_focus_body_selected)
+        
     def toggle_mode(self):
         """Toggle between God Mode and Simulation Mode."""
         if self.state.mode == SimulationMode.GOD_MODE:

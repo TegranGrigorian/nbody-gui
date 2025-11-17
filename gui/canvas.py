@@ -44,6 +44,13 @@ class SimulationCanvas:
         self.velocity_arrow: Optional[FancyArrow] = None
         self.velocity_start_pos: Optional[Tuple[float, float]] = None
         
+        # Panning state (for simulation mode)
+        self.is_panning = False
+        self.pan_start_x = 0.0
+        self.pan_start_y = 0.0
+        self.pan_center_x_start = 0.0
+        self.pan_center_y_start = 0.0
+        
         # Create matplotlib figure
         self.fig, self.ax = plt.subplots(figsize=(10, 10))
         self.canvas = FigureCanvasTkAgg(self.fig, master=parent)
@@ -91,9 +98,22 @@ class SimulationCanvas:
         
         if self.state.mode == SimulationMode.GOD_MODE:
             self.handle_god_mode_click(click_x, click_y, event.button)
+        elif self.state.mode == SimulationMode.SIMULATION_MODE:
+            # Start panning in simulation mode
+            if event.button == 1:  # Left click
+                self.is_panning = True
+                self.pan_start_x = click_x
+                self.pan_start_y = click_y
+                self.pan_center_x_start = self.center_x
+                self.pan_center_y_start = self.center_y
     
     def on_mouse_release(self, event):
         """Handle mouse release events."""
+        # Handle panning end (even if mouse is outside axes)
+        if self.state.mode == SimulationMode.SIMULATION_MODE and self.is_panning:
+            self.is_panning = False
+            return
+        
         if event.inaxes != self.ax or event.xdata is None or event.ydata is None:
             return
         
@@ -199,6 +219,30 @@ class SimulationCanvas:
     def on_mouse_move(self, event):
         """Handle mouse movement."""
         if event.inaxes != self.ax or event.xdata is None or event.ydata is None:
+            return
+        
+        # Handle panning in simulation mode
+        if self.state.mode == SimulationMode.SIMULATION_MODE and self.is_panning:
+            current_x, current_y = event.xdata, event.ydata
+            
+            # Calculate pan offset
+            dx = current_x - self.pan_start_x
+            dy = current_y - self.pan_start_y
+            
+            # Update center position (subtract because we're moving the view)
+            self.center_x = self.pan_center_x_start - dx
+            self.center_y = self.pan_center_y_start - dy
+            
+            # Disable auto-tracking when user pans
+            if self.auto_zoom_to_cog or self.capture_all_bodies:
+                self.auto_zoom_to_cog = False
+                self.capture_all_bodies = False
+                # Update control panel buttons if they exist
+                if hasattr(self, 'control_panel_ref'):
+                    self.control_panel_ref.update_camera_buttons()
+            
+            self.update_view_limits()
+            self.render()
             return
         
         if self.state.mode == SimulationMode.GOD_MODE:

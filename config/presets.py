@@ -83,19 +83,25 @@ class ScenarioPresets:
     def three_body_problem():
         """
         Three-Body Problem: Triple star system with a planet (Liu Cixin inspired).
-        Three stars in chaotic orbits with a planet trying to survive.
+        Three stars in a more stable configuration with a planet in a wider orbit.
         """
-        # Three suns of different masses creating chaotic system
-        alpha = CelestialBody("Alpha", SOLAR_MASS * 1.2, 
-                             -1.2*AU, 0, 0, -18000, "#FDB813")
-        beta = CelestialBody("Beta", SOLAR_MASS * 0.9, 
-                            1.5*AU, 0, 0, 15000, "#FF6B35")
-        gamma = CelestialBody("Gamma", SOLAR_MASS * 1.1, 
-                             0.2*AU, 1.8*AU, -12000, 5000, "#FF0000")
+        # Three suns in a hierarchical triple system for stability
+        # Two close binary stars + one distant star
         
-        # Planet caught in the chaotic system
+        # Close binary pair (Alpha and Beta)
+        alpha = CelestialBody("Alpha", SOLAR_MASS * 1.1, 
+                             -0.5*AU, 0, 0, -25000, "#FDB813")
+        beta = CelestialBody("Beta", SOLAR_MASS * 1.0, 
+                            0.5*AU, 0, 0, 27500, "#FF6B35")
+        
+        # Distant third star (Gamma) - creates the chaotic element
+        gamma = CelestialBody("Gamma", SOLAR_MASS * 0.9, 
+                             0, 4.0*AU, -8000, 0, "#FF0000")
+        
+        # Planet in a relatively stable orbit around the binary center
+        # Positioned further out to avoid immediate ejection
         planet = CelestialBody("Trisolaris", EARTH_MASS * 2.0, 
-                              0.8*AU, 0, 0, 32000, "#4A90E2")
+                              2.5*AU, 0, 0, 20000, "#4A90E2")
         
         return [alpha, beta, gamma, planet]
     
