@@ -1,0 +1,3 @@
+-e git+ssh://git@github.com/TegranGrigorian/n-body-simulator.git@778b314cdbd279cbf5781cb02e1a4243d3858dd7#egg=nbody_simulator
+numpy==2.3.5
+pybind11==3.0.1
