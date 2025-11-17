@@ -38,6 +38,8 @@ class SimulationCanvas:
         # Camera tracking modes
         self.auto_zoom_to_cog = False
         self.capture_all_bodies = False
+        self.focus_body_mode = False
+        self.focused_body: Optional[CelestialBody] = None
         self.frame_counter = 0
         
         # Interaction state
@@ -234,9 +236,11 @@ class SimulationCanvas:
             self.center_y = self.pan_center_y_start - dy
             
             # Disable auto-tracking when user pans
-            if self.auto_zoom_to_cog or self.capture_all_bodies:
+            if self.auto_zoom_to_cog or self.capture_all_bodies or self.focus_body_mode:
                 self.auto_zoom_to_cog = False
                 self.capture_all_bodies = False
+                self.focus_body_mode = False
+                self.focused_body = None
                 # Update control panel buttons if they exist
                 if hasattr(self, 'control_panel_ref'):
                     self.control_panel_ref.update_camera_buttons()
@@ -320,12 +324,17 @@ class SimulationCanvas:
         if self.state.mode == SimulationMode.SIMULATION_MODE:
             self.frame_counter += 1
             
+            # Focus on specific body mode (highest priority)
+            if self.focus_body_mode and self.focused_body and self.focused_body in self.state.bodies:
+                x, y = self.focused_body.get_position()
+                self.center_x = x
+                self.center_y = y
+                self.update_view_limits()
             # Auto zoom to center of gravity every 10 frames
-            if self.auto_zoom_to_cog and self.frame_counter % 10 == 0:
+            elif self.auto_zoom_to_cog and self.frame_counter % 10 == 0:
                 self.center_to_cog()
-            
             # Capture all bodies mode
-            if self.capture_all_bodies:
+            elif self.capture_all_bodies:
                 self.zoom_to_capture_all()
         
         # Draw trails in simulation mode
@@ -482,3 +491,21 @@ class SimulationCanvas:
         """Toggle capture all bodies mode."""
         self.capture_all_bodies = not self.capture_all_bodies
         return self.capture_all_bodies
+    
+    def toggle_focus_body(self):
+        """Toggle focus body mode."""
+        self.focus_body_mode = not self.focus_body_mode
+        if not self.focus_body_mode:
+            self.focused_body = None
+        return self.focus_body_mode
+    
+    def set_focused_body(self, body: Optional[CelestialBody]):
+        """Set the body to focus on."""
+        self.focused_body = body
+        if body is not None:
+            self.focus_body_mode = True
+            # Disable other camera modes
+            self.auto_zoom_to_cog = False
+            self.capture_all_bodies = False
+        else:
+            self.focus_body_mode = False

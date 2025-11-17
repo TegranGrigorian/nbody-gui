@@ -83,25 +83,25 @@ class ScenarioPresets:
     def three_body_problem():
         """
         Three-Body Problem: Triple star system with a planet (Liu Cixin inspired).
-        Three stars in a more stable configuration with a planet in a wider orbit.
+        Hierarchical triple system with planet in stable P-type orbit around binary.
         """
-        # Three suns in a hierarchical triple system for stability
-        # Two close binary stars + one distant star
-        
-        # Close binary pair (Alpha and Beta)
-        alpha = CelestialBody("Alpha", SOLAR_MASS * 1.1, 
-                             -0.5*AU, 0, 0, -25000, "#FDB813")
+        # Close binary pair (Alpha and Beta) - tighter orbit for more stability
+        # Circular orbit around common center of mass
+        alpha = CelestialBody("Alpha", SOLAR_MASS * 1.0, 
+                             -0.3*AU, 0, 0, -30000, "#FDB813")
         beta = CelestialBody("Beta", SOLAR_MASS * 1.0, 
-                            0.5*AU, 0, 0, 27500, "#FF6B35")
+                            0.3*AU, 0, 0, 30000, "#FF6B35")
         
-        # Distant third star (Gamma) - creates the chaotic element
-        gamma = CelestialBody("Gamma", SOLAR_MASS * 0.9, 
-                             0, 4.0*AU, -8000, 0, "#FF0000")
+        # Distant third star (Gamma) in wide orbit - provides chaotic perturbations
+        # Much further out to avoid disrupting the planet
+        gamma = CelestialBody("Gamma", SOLAR_MASS * 0.8, 
+                             0, 6.0*AU, -6500, 0, "#FF0000")
         
-        # Planet in a relatively stable orbit around the binary center
-        # Positioned further out to avoid immediate ejection
+        # Planet in P-type circumbinary orbit around Alpha-Beta pair
+        # Positioned well outside the binary (>3x separation) for Hill stability
+        # Velocity calculated for roughly circular orbit around binary center
         planet = CelestialBody("Trisolaris", EARTH_MASS * 2.0, 
-                              2.5*AU, 0, 0, 20000, "#4A90E2")
+                              2.2*AU, 0, 0, 22000, "#4A90E2")
         
         return [alpha, beta, gamma, planet]
     
