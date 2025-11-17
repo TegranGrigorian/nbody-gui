@@ -24,6 +24,10 @@ class NBodyApp:
         self.root.title("N-Body Simulation - God Mode")
         self.root.geometry("1600x900")
         
+        # Configure button styles
+        style = ttk.Style()
+        style.configure('Active.TButton', background='#4A90E2', foreground='white')
+        
         # Shared simulation state
         self.state = SimulationState()
         
@@ -68,6 +72,8 @@ class NBodyApp:
         self.control_panel.zoom_in_button.config(command=self.canvas.zoom_in)
         self.control_panel.zoom_out_button.config(command=self.canvas.zoom_out)
         self.control_panel.reset_view_button.config(command=self.canvas.reset_view)
+        self.control_panel.auto_cog_button.config(command=self.toggle_auto_cog)
+        self.control_panel.capture_all_button.config(command=self.toggle_capture_all)
     
     def on_body_selected(self, body: CelestialBody):
         """Handle body selection from canvas."""
@@ -102,6 +108,26 @@ class NBodyApp:
         self.canvas.is_dragging_arrow = False
         
         self.canvas.render()
+    
+    def toggle_auto_cog(self):
+        """Toggle auto zoom to center of gravity."""
+        is_active = self.canvas.toggle_auto_zoom_cog()
+        
+        # Update button appearance
+        if is_active:
+            self.control_panel.auto_cog_button.config(style='Active.TButton')
+        else:
+            self.control_panel.auto_cog_button.config(style='TButton')
+    
+    def toggle_capture_all(self):
+        """Toggle capture all bodies mode."""
+        is_active = self.canvas.toggle_capture_all()
+        
+        # Update button appearance
+        if is_active:
+            self.control_panel.capture_all_button.config(style='Active.TButton')
+        else:
+            self.control_panel.capture_all_button.config(style='TButton')
     
     def start_animation_loop(self):
         """Start the main animation loop."""

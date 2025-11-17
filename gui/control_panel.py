@@ -105,20 +105,31 @@ class ControlPanel:
         view_frame = ttk.LabelFrame(self.frame, text="View", padding="5")
         view_frame.pack(side=tk.LEFT, padx=5)
         
-        button_frame = ttk.Frame(view_frame)
-        button_frame.pack()
+        button_row1 = ttk.Frame(view_frame)
+        button_row1.pack(pady=2)
         
-        self.zoom_in_button = ttk.Button(button_frame, text="🔍+", width=5,
+        self.zoom_in_button = ttk.Button(button_row1, text="🔍+", width=5,
                                         command=self.on_zoom_in)
         self.zoom_in_button.pack(side=tk.LEFT, padx=2)
         
-        self.zoom_out_button = ttk.Button(button_frame, text="🔍-", width=5,
+        self.zoom_out_button = ttk.Button(button_row1, text="🔍-", width=5,
                                          command=self.on_zoom_out)
         self.zoom_out_button.pack(side=tk.LEFT, padx=2)
         
-        self.reset_view_button = ttk.Button(button_frame, text="Reset", width=5,
+        self.reset_view_button = ttk.Button(button_row1, text="Reset", width=5,
                                            command=self.on_reset_view)
         self.reset_view_button.pack(side=tk.LEFT, padx=2)
+        
+        button_row2 = ttk.Frame(view_frame)
+        button_row2.pack(pady=2)
+        
+        self.auto_cog_button = ttk.Button(button_row2, text="Auto CoG", width=12,
+                                         command=self.toggle_auto_cog)
+        self.auto_cog_button.pack(side=tk.LEFT, padx=2)
+        
+        self.capture_all_button = ttk.Button(button_row2, text="Capture All", width=12,
+                                            command=self.toggle_capture_all)
+        self.capture_all_button.pack(side=tk.LEFT, padx=2)
         
     def toggle_mode(self):
         """Toggle between God Mode and Simulation Mode."""
@@ -189,4 +200,12 @@ class ControlPanel:
     
     def on_reset_view(self):
         """Callback for reset view button."""
+        pass  # Will be connected by main app
+    
+    def toggle_auto_cog(self):
+        """Callback for auto CoG button."""
+        pass  # Will be connected by main app
+    
+    def toggle_capture_all(self):
+        """Callback for capture all button."""
         pass  # Will be connected by main app

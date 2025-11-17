@@ -35,6 +35,11 @@ class SimulationCanvas:
         self.center_x = 0.0
         self.center_y = 0.0
         
+        # Camera tracking modes
+        self.auto_zoom_to_cog = False
+        self.capture_all_bodies = False
+        self.frame_counter = 0
+        
         # Interaction state
         self.velocity_arrow: Optional[FancyArrow] = None
         self.velocity_start_pos: Optional[Tuple[float, float]] = None
@@ -267,6 +272,18 @@ class SimulationCanvas:
         for patch in self.ax.patches[:]:
             patch.remove()
         
+        # Update camera if in simulation mode
+        if self.state.mode == SimulationMode.SIMULATION_MODE:
+            self.frame_counter += 1
+            
+            # Auto zoom to center of gravity every 10 frames
+            if self.auto_zoom_to_cog and self.frame_counter % 10 == 0:
+                self.center_to_cog()
+            
+            # Capture all bodies mode
+            if self.capture_all_bodies:
+                self.zoom_to_capture_all()
+        
         # Draw trails in simulation mode
         if self.state.mode == SimulationMode.SIMULATION_MODE:
             for i, trajectory in enumerate(self.state.trajectories):
@@ -285,8 +302,8 @@ class SimulationCanvas:
             mass_scale = math.log10(body.get_mass() / 1e24) if body.get_mass() > 0 else 1
             size = max(100, mass_scale * 50)
             
-            # Highlight if selected
-            if body.is_selected:
+            # Only highlight if selected AND in God Mode
+            if body.is_selected and self.state.mode == SimulationMode.GOD_MODE:
                 size *= 1.5
                 # Draw selection ring
                 circle = plt.Circle((x, y), 0.15 * AU, color='white', 
@@ -303,30 +320,31 @@ class SimulationCanvas:
                               color='white', fontsize=9, 
                               ha='center', va='bottom', zorder=6)
         
-        # Draw velocity arrow ONLY for selected body if velocity is set OR in edit mode
-        selected = self.state.get_selected_body()
-        if selected:
-            vx, vy = selected.get_velocity()
-            x, y = selected.get_position()
-            
-            # Show arrow if in velocity setting mode OR if velocity is non-zero
-            if selected.is_setting_velocity or (vx != 0 or vy != 0):
-                # Scale velocity for visualization (1 AU per 30 km/s)
-                scale = AU / 30000.0
-                arrow_dx = vx * scale
-                arrow_dy = vy * scale
+        # Draw velocity arrow ONLY in God Mode for selected body
+        if self.state.mode == SimulationMode.GOD_MODE:
+            selected = self.state.get_selected_body()
+            if selected:
+                vx, vy = selected.get_velocity()
+                x, y = selected.get_position()
                 
-                # Only draw if arrow has some length
-                arrow_length = (arrow_dx**2 + arrow_dy**2)**0.5
-                if arrow_length > 0.01 * AU:
-                    color = 'yellow' if selected.is_setting_velocity else 'cyan'
-                    alpha = 0.8 if selected.is_setting_velocity else 0.6
-                    linewidth = 3 if selected.is_setting_velocity else 2
+                # Show arrow if in velocity setting mode OR if velocity is non-zero
+                if selected.is_setting_velocity or (vx != 0 or vy != 0):
+                    # Scale velocity for visualization (1 AU per 30 km/s)
+                    scale = AU / 30000.0
+                    arrow_dx = vx * scale
+                    arrow_dy = vy * scale
                     
-                    self.velocity_arrow = self.ax.arrow(x, y, arrow_dx, arrow_dy,
-                                        head_width=0.1*AU, head_length=0.15*AU,
-                                        fc=color, ec=color, linewidth=linewidth, 
-                                        alpha=alpha, zorder=7)
+                    # Only draw if arrow has some length
+                    arrow_length = (arrow_dx**2 + arrow_dy**2)**0.5
+                    if arrow_length > 0.01 * AU:
+                        color = 'yellow' if selected.is_setting_velocity else 'cyan'
+                        alpha = 0.8 if selected.is_setting_velocity else 0.6
+                        linewidth = 3 if selected.is_setting_velocity else 2
+                        
+                        self.velocity_arrow = self.ax.arrow(x, y, arrow_dx, arrow_dy,
+                                            head_width=0.1*AU, head_length=0.15*AU,
+                                            fc=color, ec=color, linewidth=linewidth, 
+                                            alpha=alpha, zorder=7)
         
         self.canvas.draw()
     
@@ -349,3 +367,74 @@ class SimulationCanvas:
         self.center_y = 0.0
         self.update_view_limits()
         self.render()
+    
+    def center_to_cog(self):
+        """Center view on center of gravity."""
+        if not self.state.bodies:
+            return
+        
+        # Calculate center of gravity
+        total_mass = 0.0
+        cog_x = 0.0
+        cog_y = 0.0
+        
+        for body in self.state.bodies:
+            mass = body.get_mass()
+            x, y = body.get_position()
+            cog_x += mass * x
+            cog_y += mass * y
+            total_mass += mass
+        
+        if total_mass > 0:
+            cog_x /= total_mass
+            cog_y /= total_mass
+            
+            self.center_x = cog_x
+            self.center_y = cog_y
+            self.update_view_limits()
+    
+    def zoom_to_capture_all(self):
+        """Zoom to capture all bodies in view."""
+        if not self.state.bodies:
+            return
+        
+        # Find bounding box of all bodies
+        positions = [body.get_position() for body in self.state.bodies]
+        if not positions:
+            return
+        
+        x_coords, y_coords = zip(*positions)
+        min_x, max_x = min(x_coords), max(x_coords)
+        min_y, max_y = min(y_coords), max(y_coords)
+        
+        # Add padding (20%)
+        x_range = max_x - min_x
+        y_range = max_y - min_y
+        padding = 0.2
+        
+        min_x -= x_range * padding
+        max_x += x_range * padding
+        min_y -= y_range * padding
+        max_y += y_range * padding
+        
+        # Center on midpoint
+        self.center_x = (min_x + max_x) / 2
+        self.center_y = (min_y + max_y) / 2
+        
+        # Set zoom to capture all
+        x_span = (max_x - min_x) / 2
+        y_span = (max_y - min_y) / 2
+        max_span = max(x_span, y_span)
+        
+        self.zoom_level = max_span / AU if max_span > 0 else 3.0
+        self.update_view_limits()
+    
+    def toggle_auto_zoom_cog(self):
+        """Toggle auto zoom to center of gravity."""
+        self.auto_zoom_to_cog = not self.auto_zoom_to_cog
+        return self.auto_zoom_to_cog
+    
+    def toggle_capture_all(self):
+        """Toggle capture all bodies mode."""
+        self.capture_all_bodies = not self.capture_all_bodies
+        return self.capture_all_bodies
