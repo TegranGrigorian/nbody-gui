@@ -5,9 +5,11 @@ from tkinter import ttk
 
 from models import SimulationState, CelestialBody
 from models.simulation_state import SimulationMode
+from config.presets import ScenarioPresets
 from .canvas import SimulationCanvas
 from .control_panel import ControlPanel
 from .body_editor import BodyEditorPanel
+from .preset_menu import PresetMenu
 
 
 class NBodyApp:
@@ -33,6 +35,9 @@ class NBodyApp:
         
         # Create UI components
         self.control_panel = ControlPanel(self.root, self.state)
+        
+        # Add preset menu to control panel frame
+        self.preset_menu = PresetMenu(self.control_panel.frame)
         
         # Main content area
         content_frame = ttk.Frame(self.root)
@@ -74,6 +79,9 @@ class NBodyApp:
         self.control_panel.reset_view_button.config(command=self.canvas.reset_view)
         self.control_panel.auto_cog_button.config(command=self.toggle_auto_cog)
         self.control_panel.capture_all_button.config(command=self.toggle_capture_all)
+        
+        # Preset menu callback
+        self.preset_menu.on_preset_selected = self.load_preset
     
     def on_body_selected(self, body: CelestialBody):
         """Handle body selection from canvas."""
@@ -128,6 +136,35 @@ class NBodyApp:
             self.control_panel.capture_all_button.config(style='Active.TButton')
         else:
             self.control_panel.capture_all_button.config(style='TButton')
+    
+    def load_preset(self, preset_id: str):
+        """Load a preset configuration."""
+        # Map preset IDs to methods
+        preset_map = {
+            'solar_system': ScenarioPresets.solar_system,
+            'earth_moon': ScenarioPresets.earth_moon,
+            'jupiter_moons': ScenarioPresets.jupiter_moons,
+            'three_body_problem': ScenarioPresets.three_body_problem,
+            'alpha_centauri': ScenarioPresets.alpha_centauri,
+            'binary_stars': ScenarioPresets.binary_stars,
+            'figure_8': ScenarioPresets.figure_8,
+        }
+        
+        if preset_id in preset_map:
+            # Clear existing bodies
+            self.state.clear_all()
+            
+            # Load preset bodies
+            bodies = preset_map[preset_id]()
+            for body in bodies:
+                self.state.add_body(body)
+            
+            # Reset view and render
+            self.canvas.reset_view()
+            self.canvas.render()
+            
+            # Clear body editor selection
+            self.body_editor.set_body(None)
     
     def start_animation_loop(self):
         """Start the main animation loop."""
