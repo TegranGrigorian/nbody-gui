@@ -134,31 +134,15 @@ class ControlPanel:
         button_row3 = ttk.Frame(view_frame)
         button_row3.pack(pady=2)
         
-        self.focus_body_button = ttk.Button(button_row3, text="Focus Body", width=12,
-                                           command=self.toggle_focus_body)
-        self.focus_body_button.pack(side=tk.LEFT, padx=2)
+        ttk.Label(button_row3, text="Focus:").pack(side=tk.LEFT, padx=2)
         
         # Dropdown for body selection
         self.focus_body_var = tk.StringVar(value="None")
         self.focus_body_combo = ttk.Combobox(button_row3, textvariable=self.focus_body_var,
-                                            width=15, state='readonly')
+                                            width=20, state='readonly')
         self.focus_body_combo.pack(side=tk.LEFT, padx=2)
         self.focus_body_combo.bind('<<ComboboxSelected>>', self._on_focus_body_combo_selected)
-        
-        button_row3 = ttk.Frame(view_frame)
-        button_row3.pack(pady=2)
-        
-        self.focus_body_button = ttk.Button(button_row3, text="Focus Body", width=12,
-                                           command=self.toggle_focus_body)
-        self.focus_body_button.pack(side=tk.LEFT, padx=2)
-        
-        # Dropdown for body selection
-        self.focus_body_var = tk.StringVar(value="None")
-        self.focus_body_combo = ttk.Combobox(button_row3, textvariable=self.focus_body_var,
-                                            width=15, state='readonly')
-        self.focus_body_combo.pack(side=tk.LEFT, padx=2)
-        self.focus_body_combo.bind('<<ComboboxSelected>>', self.on_focus_body_selected)
-        
+    
     def toggle_mode(self):
         """Toggle between God Mode and Simulation Mode."""
         if self.state.mode == SimulationMode.GOD_MODE:
@@ -238,10 +222,6 @@ class ControlPanel:
         """Callback for capture all button."""
         pass  # Will be connected by main app
     
-    def toggle_focus_body(self):
-        """Callback for focus body button."""
-        pass  # Will be connected by main app
-    
     def on_focus_body_selected(self, event=None):
         """Handle focus body selection from dropdown."""
         pass  # Will be connected by main app
@@ -254,4 +234,5 @@ class ControlPanel:
     def update_focus_body_list(self):
         """Update the list of bodies available for focusing."""
         body_names = ["None"] + [body.name for body in self.state.bodies]
+        self.focus_body_combo['values'] = body_names
         self.focus_body_combo['values'] = body_names

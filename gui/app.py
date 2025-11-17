@@ -79,8 +79,10 @@ class NBodyApp:
         self.control_panel.reset_view_button.config(command=self.canvas.reset_view)
         self.control_panel.auto_cog_button.config(command=self.toggle_auto_cog)
         self.control_panel.capture_all_button.config(command=self.toggle_capture_all)
-        self.control_panel.focus_body_button.config(command=self.toggle_focus_body)
         self.control_panel.on_focus_body_selected = self.on_focus_body_selected
+        
+        # Update focus body list initially
+        self.control_panel.update_focus_body_list()
         
         # Preset menu callback
         self.preset_menu.on_preset_selected = self.load_preset
@@ -139,37 +141,21 @@ class NBodyApp:
         else:
             self.control_panel.capture_all_button.config(style='TButton')
     
-    def toggle_focus_body(self):
-        """Toggle focus body mode."""
-        is_active = self.canvas.toggle_focus_body()
-        
-        # Update button appearance and body list
-        if is_active:
-            self.control_panel.focus_body_button.config(style='Active.TButton')
-            # Update the body list
-            self.control_panel.update_focus_body_list()
-            # If no body selected yet, disable the mode
-            if self.canvas.focused_body is None:
-                self.canvas.focus_body_mode = False
-                self.control_panel.focus_body_button.config(style='TButton')
-        else:
-            self.control_panel.focus_body_button.config(style='TButton')
-            self.control_panel.focus_body_var.set("None")
-    
     def on_focus_body_selected(self, event=None):
         """Handle focus body selection from dropdown."""
         selected_name = self.control_panel.focus_body_var.get()
         
         if selected_name == "None":
             self.canvas.set_focused_body(None)
-            self.control_panel.focus_body_button.config(style='TButton')
+            # Disable other camera modes when deselecting
+            self.control_panel.auto_cog_button.config(style='TButton')
+            self.control_panel.capture_all_button.config(style='TButton')
         else:
             # Find the body by name
             for body in self.state.bodies:
                 if body.name == selected_name:
                     self.canvas.set_focused_body(body)
-                    self.control_panel.focus_body_button.config(style='Active.TButton')
-                    # Disable other camera modes
+                    # Disable other camera modes when focusing on a body
                     self.control_panel.auto_cog_button.config(style='TButton')
                     self.control_panel.capture_all_button.config(style='TButton')
                     break
