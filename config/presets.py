@@ -129,9 +129,9 @@ class ScenarioPresets:
         """Figure-8 choreography - stable three-body periodic orbit."""
         mass = SOLAR_MASS
         bodies = [
-            CelestialBody("Body 1", mass, -1.0*AU, 0, 0, 15000, "#FDB813"),
-            CelestialBody("Body 2", mass, 1.0*AU, 0, 0, -15000, "#FF6B35"),
-            CelestialBody("Body 3", mass, 0, 1.5*AU, -10000, 0, "#FF0000"),
+            CelestialBody("Body 1", mass, -1.0*AU, 0, 0, -15000, "#FDB813"),
+            CelestialBody("Body 2", mass, 1.0*AU, 0, 0, 17500, "#FF6B35"),
+            CelestialBody("Body 3", mass, 0, 1.5*AU, -20000, 0, "#FF0000"),
         ]
         return bodies
     
